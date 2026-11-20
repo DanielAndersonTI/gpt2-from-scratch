@@ -1,0 +1,15 @@
+{
+  "experimento": "e4_rope",
+  "split": "val",
+  "checkpoint": "/content/drive/MyDrive/LLM_Final/checkpoints/e4_rope_ultimo.pt",
+  "passos_treinados": 837,
+  "parametros": 11348480,
+  "parametros_ativos": 11348480,
+  "loss": 4.689170934690757,
+  "perplexidade": 108.76297081197826,
+  "bpb": 1.3522272214269644,
+  "tokens_avaliados": 1575936,
+  "bytes_avaliados": 7884234,
+  "horario": "2026-11-20T23:20:19",
+  "fonte": "console do Colab, transcrito da saida de src.evaluate em 2026-11-20"
+}

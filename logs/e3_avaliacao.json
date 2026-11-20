@@ -1,0 +1,14 @@
+{
+  "experimento": "e3_moe_h128",
+  "split": "val",
+  "checkpoint": "C:/Users/Daniel/Meu Drive/LLM_Final/checkpoints/e3_moe_h128_ultimo.pt",
+  "passos_treinados": 837,
+  "parametros": 11429408,
+  "parametros_ativos": 9847328,
+  "loss": 4.917335877099387,
+  "perplexidade": 136.63810714727,
+  "bpb": 1.4180236810564772,
+  "tokens_avaliados": 1575936,
+  "bytes_avaliados": 7884234,
+  "horario": "2026-11-20T23:09:26"
+}

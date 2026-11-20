@@ -8,13 +8,17 @@ funciona além do comprimento de treino.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 import torch
 
+from apoio import config_sintetica
 from src.config import load_config
 from src.model import GPTModel
 from src.rope import RoPE
 from src.seeds import set_seed
+from src.train import treinar
 
 
 @pytest.fixture
@@ -126,3 +130,64 @@ def test_modelo_com_rope_produz_logits_finitos():
     model = GPTModel(cfg.model)
     modelo_novo = model(torch.randint(0, cfg.model.vocab_size, (1, 16)))
     assert torch.isfinite(modelo_novo).all()
+
+
+# -- extrapolação ------------------------------------------------------------
+
+
+@pytest.mark.parametrize("sdpa", [True, False])
+def test_modelo_roda_alem_do_contexto_de_treino(sdpa):
+    """Janela de 64 tokens num modelo configurado para 32.
+
+    Vale para os dois caminhos de atenção. O do SDPA recebe a causalidade pelo
+    kernel; o manual usa a máscara gravada, que tem 32 linhas e é pequena
+    demais para a janela, então precisa ser refeita na hora.
+    """
+    cfg = load_config("configs/e4_rope.yaml", work_dir=".")
+    pequeno = replace(cfg.model, context_length=32, n_layers=1, emb_dim=64, n_heads=2)
+    set_seed(0)
+    model = GPTModel(pequeno, sdpa=sdpa)
+    model.eval()
+
+    with torch.no_grad():
+        logits = model(torch.randint(0, pequeno.vocab_size, (1, 64)))
+    assert logits.shape == (1, 64, pequeno.vocab_size)
+    assert torch.isfinite(logits).all()
+
+
+def test_extrapolacao_mede_o_rope_e_recusa_o_modelo_com_posicao_aprendida(projeto_sintetico):
+    """O script de extrapolação tem de medir um e barrar o outro.
+
+    O modelo com posição aprendida só tem linha de embedding para 32 posições;
+    a linha de contexto 64 vira erro anotado, não queda do script. É a
+    limitação que a comparação quer mostrar.
+    """
+    from src.extrapolacao import comparar
+
+    raiz, vocab = projeto_sintetico
+    base = config_sintetica(raiz, vocab, max_steps=2, checkpoint_every=2)
+
+    cfg_rope = replace(
+        base,
+        model=replace(base.model, pos_emb="rope"),
+        run=replace(base.run, name="teste_extrapolacao"),
+        logging=replace(base.logging, csv_path="logs/teste_extrapolacao.csv"),
+    )
+    resumo = treinar(cfg_rope, log_every=2)
+    linhas = {
+        linha["contexto"]: linha
+        for linha in comparar(resumo["checkpoint"], [32, 64], device="cpu")["contextos"]
+    }
+    assert linhas[32]["tokens_avaliados"] > 0
+    assert linhas[64]["tokens_avaliados"] > 0
+    assert 0.0 < linhas[64]["bpb"] < 20.0
+
+    cfg_aprendida = replace(
+        cfg_rope,
+        model=replace(base.model, pos_emb="learned"),
+        run=replace(base.run, name="teste_sem_extrapolacao"),
+        logging=replace(base.logging, csv_path="logs/teste_sem_extrapolacao.csv"),
+    )
+    resumo_aprendida = treinar(cfg_aprendida, log_every=2)
+    comparacao = comparar(resumo_aprendida["checkpoint"], [64], device="cpu")
+    assert "RoPE" in comparacao["contextos"][0]["erro"]

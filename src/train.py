@@ -144,8 +144,13 @@ def avaliar(
     """Perda média de validação, em nats por token.
 
     A validação usa janelas sem sobreposição e sem embaralhar. O valor é a
-    média por lote, ponderada igualmente; como todos os lotes têm o mesmo
-    tamanho, isso equivale à média por token.
+    soma das perdas dividida pelo número de tokens avaliados, e não a média das
+    médias por lote. A distinção importa porque o último lote é parcial: a
+    validação tem 6.156 janelas, que dão 48 lotes de 128 e um de 12. A média
+    por lote daria a esse resto de 3.072 tokens, 0,2% do total, o peso de 2%,
+    e o número saía cerca de 0,008 nats mais alto. É o mesmo cálculo de
+    `evaluate.bits_por_byte`, então a curva do CSV e o número do relatório
+    passam a coincidir.
 
     `max_batches` limita a amostra. Na GPU a validação inteira custa cerca de
     um segundo nos lotes de 128; o limite existe para o teste de fumaça em CPU,
@@ -154,18 +159,18 @@ def avaliar(
     comparável dentro dele.
     """
     model.eval()
-    total, n = 0.0, 0
-    for x, y in loader:
-        if max_batches is not None and n >= max_batches:
+    soma_perda, n_tokens = 0.0, 0
+    for k, (x, y) in enumerate(loader):
+        if max_batches is not None and k >= max_batches:
             break
         x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
         with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=usar_amp):
             logits = model(x)
-            perda = F.cross_entropy(logits.flatten(0, 1), y.flatten())
-        total += perda.item()
-        n += 1
+            perda = F.cross_entropy(logits.flatten(0, 1), y.flatten(), reduction="sum")
+        soma_perda += perda.item()
+        n_tokens += y.numel()
     model.train()
-    return total / n if n else float("nan")
+    return soma_perda / n_tokens if n_tokens else float("nan")
 
 
 # ---------------------------------------------------------------------------

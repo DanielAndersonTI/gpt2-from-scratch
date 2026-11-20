@@ -17,10 +17,10 @@ Entrega: 14 de dezembro de 2026, 23:59.
 | 2. Modelo | concluída |
 | 3. Treino | concluída; as quatro otimizações medidas na T4 |
 | 4. Benchmark | concluída |
-| 5. E1 vanilla | treinado; BPB e hash pendentes |
-| 6. MoE | duas variantes treinadas |
+| 5. E1 vanilla | concluída |
+| 6. MoE | duas variantes treinadas e analisadas |
 | 7. RoPE | treinada; extrapolação pendente |
-| 8. Avaliação | em andamento |
+| 8. Avaliação | os quatro BPB medidos; falta a extrapolação do RoPE |
 | 9. Artigo e oral | pendente |
 
 O acompanhamento detalhado, tarefa por tarefa, está em [TASKS.md](TASKS.md). O
@@ -34,10 +34,22 @@ na T4 do Colab, 837 passos cada, em 5 a 7 minutos.
 
 | ID | Modelo | Parâmetros totais / ativos | Loss val | BPB val | Log |
 |---|---|---|---|---|---|
-| E1 | vanilla otimizado | 11,41M / 11,41M | 4,9430 | 1,4231 | `logs/e1_vanilla.csv` |
-| E2 | MoE, 8 especialistas, top-2, h=512 | 17,73M / 11,42M | 4,8955 | pendente | `logs/e2_moe_h512.csv` |
-| E3 | MoE, 8 especialistas, top-2, h=128 | 11,43M / 9,85M | 4,9256 | pendente | `logs/e3_moe_h128.csv` |
-| E4 | RoPE | 11,35M / 11,35M | 4,6977 | pendente | `logs/e4_rope.csv` |
+| E1 | vanilla otimizado | 11,41M / 11,41M | 4,9350 | 1,4231 | `logs/e1_vanilla.csv` |
+| E2 | MoE, 8 especialistas, top-2, h=512 | 17,73M / 11,42M | 4,8871 | 1,4093 | `logs/e2_moe_h512.csv` |
+| E3 | MoE, 8 especialistas, top-2, h=128 | 11,43M / 9,85M | 4,9173 | 1,4180 | `logs/e3_moe_h128.csv` |
+| E4 | RoPE | 11,35M / 11,35M | 4,6892 | 1,3522 | `logs/e4_rope.csv` |
+
+A perda e o BPB são da partição de validação inteira, 1.575.936 tokens e
+7.884.234 bytes, medidos por `src/evaluate.py` a partir do checkpoint final. Os
+JSONs de cada avaliação estão em `logs/`. O RoPE reduz o BPB em 5,0% em relação
+ao vanilla; as duas variantes de MoE ficam 1,0% e 0,4% abaixo, com menos
+parâmetros ativos na segunda do que o vanilla tem.
+
+A coluna `loss_val` do CSV de treino lê cerca de 0,008 acima desta tabela. Os
+CSVs foram gerados antes da correção do peso do último lote parcial na função
+de validação; a tabela e os JSONs vêm de `evaluate.py`, que sempre ponderou por
+token. Um novo treino com o código atual reproduz os valores da tabela.
+
 
 ## Estrutura
 
@@ -88,6 +100,10 @@ python -m src.evaluate --checkpoint checkpoints/e1_vanilla_ultimo.pt \
 # 7. Amostras de texto
 python -m src.generate --checkpoint checkpoints/e1_vanilla_ultimo.pt \
     --temperature 0.8 --top-k 50 --top-p 0.95
+
+# 8. Extrapolação de contexto; o vanilla só aceita até 256 e o erro é anotado
+python -m src.extrapolacao --checkpoint checkpoints/e4_rope_ultimo.pt \
+    --contextos 128 256 512 1024 --saida logs/e4_extrapolacao.json
 ```
 
 O runner retoma do último checkpoint sozinho. Para recomeçar do zero, apague
@@ -101,10 +117,10 @@ reportado é de validação.
 
 | Modelo | Arquivo | SHA-256 | Loss val | BPB validação |
 |---|---|---|---|---|
-| E1 | `e1_vanilla_ultimo.pt` | `51d1179b5007aa05176d43759e57e05a9d978e02524a32cc64a0298d137e08fb` | 4,9430 | 1,4231 |
-| E2 | `e2_moe_h512_ultimo.pt` | `b42674cf8e32bdc41fe13b4325b0c44e257510f235db5e5b709d71f5d163b92d` | 4,8955 | pendente |
-| E3 | `e3_moe_h128_ultimo.pt` | `a354e2a40ba3a3e0959205f4bb19541c4fa5ab3066e00229e772c6eecf6b2723` | 4,9256 | pendente |
-| E4 | pendente de sincronização | pendente | 4,6977 | pendente |
+| E1 | `e1_vanilla_ultimo.pt` | `51d1179b5007aa05176d43759e57e05a9d978e02524a32cc64a0298d137e08fb` | 4,9350 | 1,4231 |
+| E2 | `e2_moe_h512_ultimo.pt` | `b42674cf8e32bdc41fe13b4325b0c44e257510f235db5e5b709d71f5d163b92d` | 4,8871 | 1,4093 |
+| E3 | `e3_moe_h128_ultimo.pt` | `a354e2a40ba3a3e0959205f4bb19541c4fa5ab3066e00229e772c6eecf6b2723` | 4,9173 | 1,4180 |
+| E4 | `e4_rope_ultimo.pt` | pendente de sincronização | 4,6892 | 1,3522 |
 
 ## Documentos
 

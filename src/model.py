@@ -143,7 +143,15 @@ class MultiHeadAttention(nn.Module):
             )
         else:
             pontuacoes = q @ k.transpose(-2, -1) / math.sqrt(self.head_dim)
-            mascara = self.mask[:n_tokens, :n_tokens]
+            if n_tokens <= self.mask.size(0):
+                mascara = self.mask[:n_tokens, :n_tokens]
+            else:
+                # Contexto maior que o do treino, só possível com RoPE: a
+                # máscara gravada não cobre a janela, então é refeita aqui.
+                mascara = torch.triu(
+                    torch.ones(n_tokens, n_tokens, dtype=torch.bool, device=q.device),
+                    diagonal=1,
+                )
             pontuacoes = pontuacoes.masked_fill(mascara, float("-inf"))
             pesos = torch.softmax(pontuacoes, dim=-1)
             pesos = self.dropout(pesos)

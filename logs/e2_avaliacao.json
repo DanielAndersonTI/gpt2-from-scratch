@@ -1,0 +1,14 @@
+{
+  "experimento": "e2_moe_h512",
+  "split": "val",
+  "checkpoint": "C:/Users/Daniel/Meu Drive/LLM_Final/checkpoints/e2_moe_h512_ultimo.pt",
+  "passos_treinados": 837,
+  "parametros": 17733152,
+  "parametros_ativos": 11423264,
+  "loss": 4.88709803352579,
+  "perplexidade": 132.56830652385827,
+  "bpb": 1.4093039231788165,
+  "tokens_avaliados": 1575936,
+  "bytes_avaliados": 7884234,
+  "horario": "2026-11-20T23:31:21"
+}
