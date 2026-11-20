@@ -58,6 +58,10 @@ def bits_por_byte(
     avaliados.
     """
     model.eval()
+    # A tabela de bytes vai para o mesmo dispositivo do lote. Sem isso, o
+    # indexamento `tabela_bytes[y]` falha na GPU, porque `y` está na placa e a
+    # tabela na memória principal.
+    tabela_bytes = tabela_bytes.to(device)
     soma_loss, soma_bytes, n_tokens = 0.0, 0, 0
 
     for k, (x, y) in enumerate(loader):
