@@ -1,0 +1,60 @@
+﻿# E4 — RoPE: posição por rotação, no lugar do embedding posicional aprendido.
+# As matrizes de posição (65.536 parâmetros) saem do modelo e a posição entra
+# girando Q e K. O modelo fica com 11,35M de parâmetros, praticamente o mesmo
+# total do E1, e ganha a capacidade de extrapolar para contextos maiores.
+
+run:
+  name: e4_rope
+  work_dir: /content/drive/MyDrive/LLM_Final
+  seed: 123
+  device: auto
+  deterministic: true
+
+data:
+  corpus_dir: corpus
+  tokenizer_path: corpus/tokenizer_16k/tokenizer.json
+  preprocessed_dir: preprocessed
+  context_length: 256
+  stride: 256
+  batch_size: 128
+  num_workers: 2
+  drop_last: true
+
+model:
+  vocab_size: 16000
+  context_length: 256
+  n_layers: 4
+  n_heads: 4
+  emb_dim: 256
+  drop_rate: 0.1
+  qkv_bias: false
+  ffn_type: dense
+  pos_emb: rope
+  weight_tying: false
+  # Base da rotação: 10.000 é o valor do RoFormer. Frequências menores em
+  # dimensões mais altas, o que separa escalas de posição próximas e distantes.
+  rope_theta: 10000.0
+
+training:
+  max_steps: 837
+  lr: 0.0004
+  min_lr_ratio: 0.1
+  warmup_frac: 0.05
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every_frac: 0.1
+  amp: true
+  amp_dtype: float16
+  sdpa: true
+  fused_adamw: true
+  compile: false
+  checkpoint_every: 500
+  checkpoint_dir: checkpoints
+  max_hours: 3
+
+logging:
+  csv_path: logs/e4_rope.csv
+  prompts:
+    - "Nos últimos anos,"
+    - "Este trabalho tem como objetivo"
+    - "No semiárido paraibano,"

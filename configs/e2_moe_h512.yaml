@@ -1,0 +1,64 @@
+﻿# E2 — Mixture of Experts com oito especialistas, top-2, h=512.
+# Cada token ativa 2 dos 8 especialistas. A largura dos especialistas foi
+# escolhida para que o custo por token fique próximo do E1: 11,42M ativos
+# contra 11,41M do baseline. Espera-se aprender mais por token gasto, porque a
+# capacidade total sobe para 17,73M de parâmetros.
+
+run:
+  name: e2_moe_h512
+  work_dir: /content/drive/MyDrive/LLM_Final
+  seed: 123
+  device: auto
+  deterministic: true
+
+data:
+  corpus_dir: corpus
+  tokenizer_path: corpus/tokenizer_16k/tokenizer.json
+  preprocessed_dir: preprocessed
+  context_length: 256
+  stride: 256
+  batch_size: 128
+  num_workers: 2
+  drop_last: true
+
+model:
+  vocab_size: 16000
+  context_length: 256
+  n_layers: 4
+  n_heads: 4
+  emb_dim: 256
+  drop_rate: 0.1
+  qkv_bias: false
+  ffn_type: moe
+  pos_emb: learned
+  weight_tying: false
+  moe:
+    n_experts: 8
+    top_k: 2
+    hidden_dim: 512
+    # Switch Transformer: puxa o roteador para distribuir os tokens.
+    aux_loss_coef: 0.01
+
+training:
+  max_steps: 837
+  lr: 0.0004
+  min_lr_ratio: 0.1
+  warmup_frac: 0.05
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every_frac: 0.1
+  amp: true
+  amp_dtype: float16
+  sdpa: true
+  fused_adamw: true
+  compile: false
+  checkpoint_every: 500
+  checkpoint_dir: checkpoints
+  max_hours: 3
+
+logging:
+  csv_path: logs/e2_moe_h512.csv
+  prompts:
+    - "Nos últimos anos,"
+    - "Este trabalho tem como objetivo"
+    - "No semiárido paraibano,"

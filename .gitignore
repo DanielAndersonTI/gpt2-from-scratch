@@ -5,6 +5,7 @@
 /val.parquet
 /corpus_ufcg_introducoes_alunos.zip
 /corpus/
+/preprocessed/
 
 # Tokenizador de referência: versionado, 1,6 MB, necessário para reproduzir.
 
@@ -27,3 +28,5 @@ venv/
 # Logs grandes; os CSV pequenos são versionados
 logs/*.log
 logs/*.out
+# Fumaça de CPU: é teste de pipeline, não resultado
+/logs/smoke/

@@ -12,14 +12,14 @@ Entrega: 14 de dezembro de 2026, 23:59.
 
 | Fase | Situação |
 |---|---|
-| 0. Fundação | em andamento |
-| 1. Dados | pendente |
-| 2. Modelo | pendente |
-| 3. Treino | pendente |
+| 0. Fundação | concluída |
+| 1. Dados | concluída, exceto a comparação com o `tiktoken` |
+| 2. Modelo | concluída |
+| 3. Treino | concluída em CPU; as quatro otimizações de GPU aguardam a primeira sessão |
 | 4. Benchmark | pendente |
 | 5. E1 vanilla | pendente |
-| 6. MoE | pendente |
-| 7. RoPE | pendente |
+| 6. MoE | camada e testes prontos; treino na GPU pendente |
+| 7. RoPE | camada e testes prontos; treino na GPU pendente |
 | 8. Avaliação | pendente |
 | 9. Artigo e oral | pendente |
 
@@ -60,24 +60,49 @@ compartilhado pelo professor, descrito em [docs/corpus-readme.md](docs/corpus-re
 
 ## Como reproduzir
 
-Preenchido na T42, ao final dos experimentos. Cada experimento terá um comando
-único, por exemplo:
+Verificado localmente em 20/11/2026, em CPU, com o corpus e o tokenizador em
+`WORK_DIR/corpus/`. O pré-processamento é feito uma vez e reutilizado; sem ele,
+todo comando falha com uma mensagem de caminho ausente.
 
 ```bash
-python -m src.train --config configs/e1_vanilla.yaml
+# 1. Pré-tokenização e conferência contra o .parquet (uma vez, ~2 min)
+python -m src.data --work-dir . --verificar-parquet
+
+# 2. Testes
+pytest
+
+# 3. Fumaça de CPU, 30 passos, para checar o pipeline
+python -m src.train --config configs/smoke_cpu.yaml
+
+# 4. Benchmark de custo das otimizações (na GPU)
+python -m src.benchmark --config configs/benchmark.yaml
+
+# 5. Treino completo de um experimento
+python -m src.run_session --config configs/e1_vanilla.yaml --max-hours 3
+
+# 6. Avaliação de um checkpoint
+python -m src.evaluate --checkpoint checkpoints/e1_vanilla_ultimo.pt \
+    --saida logs/e1_avaliacao.json
+
+# 7. Amostras de texto
+python -m src.generate --checkpoint checkpoints/e1_vanilla_ultimo.pt \
+    --temperature 0.8 --top-k 50 --top-p 0.95
 ```
+
+O runner retoma do último checkpoint sozinho. Para recomeçar do zero, apague
+`WORK_DIR/checkpoints/` ou passe `--sem-retomar`.
 
 ## Checkpoints e hashes
 
-Preenchido ao final de cada treino. O BPB de teste só vale para o checkpoint cujo
-hash estiver registrado aqui.
+Preenchido ao final de cada treino. O corpus tem partição de treino e de
+validação, sem partição de teste; todo BPB reportado é de validação.
 
-| Modelo | Arquivo | SHA-256 | BPB validação | BPB teste |
-|---|---|---|---|---|
-| E1 | pendente | pendente | pendente | pendente |
-| E2 | pendente | pendente | pendente | pendente |
-| E3 | pendente | pendente | pendente | pendente |
-| E4 | pendente | pendente | pendente | pendente |
+| Modelo | Arquivo | SHA-256 | BPB validação |
+|---|---|---|---|
+| E1 | pendente | pendente | pendente |
+| E2 | pendente | pendente | pendente |
+| E3 | pendente | pendente | pendente |
+| E4 | pendente | pendente | pendente |
 
 ## Documentos
 

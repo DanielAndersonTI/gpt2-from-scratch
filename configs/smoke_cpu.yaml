@@ -1,0 +1,58 @@
+# Fumaça: treino minúsculo em CPU, para validar o pipeline ponta a ponta.
+# Não é experimento: serve para provar que dados, modelo, loop, avaliação,
+# checkpoint e log funcionam antes de gastar GPU. Roda em menos de um minuto.
+
+run:
+  name: smoke_cpu
+  # "." = a própria pasta do projeto, onde o corpus está descompactado.
+  work_dir: .
+  seed: 123
+  device: cpu
+  deterministic: true
+
+data:
+  corpus_dir: corpus
+  tokenizer_path: corpus/tokenizer_16k/tokenizer.json
+  preprocessed_dir: preprocessed
+  context_length: 64
+  stride: 64
+  batch_size: 16
+  num_workers: 0
+  drop_last: true
+
+model:
+  vocab_size: 16000
+  context_length: 64
+  n_layers: 2
+  n_heads: 4
+  emb_dim: 128
+  drop_rate: 0.1
+  qkv_bias: false
+  ffn_type: dense
+  pos_emb: learned
+  weight_tying: false
+
+training:
+  max_steps: 30
+  lr: 0.0004
+  min_lr_ratio: 0.1
+  warmup_frac: 0.1
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every_frac: 0.34  # duas avaliações em 30 passos
+  # Em CPU a validação inteira (385 lotes) levaria minutos; cinco bastam para
+  # provar que o caminho funciona. Na GPU o padrão é 0, validação inteira.
+  eval_max_batches: 5
+  amp: false
+  amp_dtype: float16
+  sdpa: true
+  fused_adamw: false
+  compile: false
+  checkpoint_every: 10
+  checkpoint_dir: checkpoints/smoke
+  max_hours: null
+
+logging:
+  csv_path: logs/smoke/smoke_cpu.csv
+  prompts:
+    - "Este trabalho tem como objetivo"

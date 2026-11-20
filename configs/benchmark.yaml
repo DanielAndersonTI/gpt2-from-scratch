@@ -1,0 +1,65 @@
+﻿# Benchmark — rodadas curtas para medir custo, não qualidade.
+# Serve para a T26/T27: 200 passos do E1 com cada otimização ligada e desligada,
+# registrando tokens/s e memória de pico. O resultado vira a tabela de custo
+# computacional do artigo.
+#
+# Cada variante é obtida por flags de linha de comando, não por arquivo:
+#   python -m src.benchmark --config configs/benchmark.yaml --variant base
+#   python -m src.benchmark --config configs/benchmark.yaml --variant amp
+#   python -m src.benchmark --config configs/benchmark.yaml --variant sdpa
+#   python -m src.benchmark --config configs/benchmark.yaml --variant fused
+#   python -m src.benchmark --config configs/benchmark.yaml --variant compile
+#   python -m src.benchmark --config configs/benchmark.yaml --variant all
+
+run:
+  name: benchmark
+  work_dir: /content/drive/MyDrive/LLM_Final
+  seed: 123
+  device: auto
+  deterministic: true
+
+data:
+  corpus_dir: corpus
+  tokenizer_path: corpus/tokenizer_16k/tokenizer.json
+  preprocessed_dir: preprocessed
+  context_length: 256
+  stride: 256
+  batch_size: 128
+  num_workers: 2
+  drop_last: true
+
+model:
+  vocab_size: 16000
+  context_length: 256
+  n_layers: 4
+  n_heads: 4
+  emb_dim: 256
+  drop_rate: 0.1
+  qkv_bias: false
+  ffn_type: dense
+  pos_emb: learned
+  weight_tying: false
+
+training:
+  max_steps: 200
+  lr: 0.0004
+  min_lr_ratio: 0.1
+  warmup_frac: 0.05
+  weight_decay: 0.1
+  grad_clip: 1.0
+  # Uma única avaliação no fim: o benchmark mede custo, não curva.
+  eval_every_frac: 1.0
+  amp: false
+  amp_dtype: float16
+  sdpa: false
+  fused_adamw: false
+  compile: false
+  # Sem checkpoint: cada variante é descartável.
+  checkpoint_every: 0
+  checkpoint_dir: checkpoints/benchmark
+  max_hours: null
+
+logging:
+  csv_path: logs/benchmark.csv
+  prompts:
+    - "Nos últimos anos,"

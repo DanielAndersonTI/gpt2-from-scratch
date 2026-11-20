@@ -1,0 +1,62 @@
+﻿# E1 — baseline: GPT-2 do livro com o pipeline otimizado.
+# Todos os experimentos usam este arquivo como referência: mesmo tokenizador,
+# mesmo contexto, mesmo orçamento de 27.426.816 tokens, mesma semente.
+# A única diferença entre os arquivos é a arquitetura.
+
+run:
+  name: e1_vanilla
+  # No Colab, a pasta do projeto no Drive. Na máquina local, exporte
+  # PROJECT_WORK_DIR ou passe --work-dir para sobrescrever.
+  work_dir: /content/drive/MyDrive/LLM_Final
+  seed: 123
+  device: auto
+  deterministic: true
+
+data:
+  corpus_dir: corpus
+  tokenizer_path: corpus/tokenizer_16k/tokenizer.json
+  preprocessed_dir: preprocessed
+  context_length: 256
+  stride: 256
+  batch_size: 128
+  num_workers: 2
+  drop_last: true
+
+model:
+  vocab_size: 16000
+  context_length: 256
+  n_layers: 4
+  n_heads: 4
+  emb_dim: 256
+  drop_rate: 0.1
+  qkv_bias: false
+  ffn_type: dense
+  pos_emb: learned
+  weight_tying: false
+  # Sem bloco moe: ffn_type = dense usa a feed-forward do livro.
+
+training:
+  # 837 passos x 128 x 256 = 27.426.816 tokens, o mesmo orçamento nos quatro
+  # experimentos. Ver a explicação em src/config.py.
+  max_steps: 837
+  lr: 0.0004
+  min_lr_ratio: 0.1
+  warmup_frac: 0.05
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every_frac: 0.1
+  amp: true
+  amp_dtype: float16
+  sdpa: true
+  fused_adamw: true
+  compile: false
+  checkpoint_every: 500
+  checkpoint_dir: checkpoints
+  max_hours: 3
+
+logging:
+  csv_path: logs/e1_vanilla.csv
+  prompts:
+    - "Nos últimos anos,"
+    - "Este trabalho tem como objetivo"
+    - "No semiárido paraibano,"
