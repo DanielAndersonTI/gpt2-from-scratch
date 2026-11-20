@@ -1,6 +1,6 @@
 # Tarefas — GPT-2 do zero em português (pós-graduação)
 
-Atualizado em 2026-11-20. Progresso: 36 de 50 concluídas, 1 em andamento. Prazo final: 14 de dezembro de 2026, 23:59.
+Atualizado em 2026-11-20. Progresso: 39 de 50 concluídas, 1 em andamento. Prazo final: 14 de dezembro de 2026, 23:59.
 
 Marcas: `[ ]` pendente, `[~]` em andamento, `[x]` feito, `[!]` bloqueado. A ordem é a de execução, e cada tarefa só começa quando a anterior fecha. O tempo de GPU aparece marcado; o restante é trabalho de escrita, teste e revisão.
 
@@ -63,8 +63,8 @@ Total: 48 a 51 h de trabalho e cerca de 3 h 40 de GPU.
 | ID | Tarefa | Entregável | Tempo | Status |
 |---|---|---|---|---|
 | T28 | Treinar o E1 completo, 27,4M tokens | checkpoint do baseline | 40 min GPU | `[x]` |
-| T29 | BPB, perplexidade, três prompts e hash SHA-256 do checkpoint | números do E1 | 30 min | `[ ]` |
-| T30 | Commitar log, curva e hash | checkpoint rastreado | 10 min | `[ ]` |
+| T29 | BPB, perplexidade, três prompts e hash SHA-256 do checkpoint | números do E1 | 30 min | `[x]` |
+| T30 | Commitar log, curva e hash | checkpoint rastreado | 10 min | `[x]` |
 
 ## Fase 6 — MoE (6 h 20)
 
@@ -83,7 +83,7 @@ Total: 48 a 51 h de trabalho e cerca de 3 h 40 de GPU.
 |---|---|---|---|---|
 | T37 | `src/rope.py` e testes: norma preservada e produto interno dependente da distância | rotação verificada | 1 h 30 | `[x]` |
 | T38 | Integrar RoPE em Q e K e treinar o E4 | checkpoint do E4 | 1 h, 40 min GPU | `[x]` |
-| T39 | Extrapolação em 256, 512 e 1024 e figura comparativa; `src/extrapolacao.py` escrito, falta rodar na GPU | resultado da modificação | 1 h 30 | `[ ]` |
+| T39 | Extrapolação em 128, 256, 512 e 1024 com `src/extrapolacao.py` | resultado da modificação | 1 h 30 | `[x]` |
 
 ## Fase 8 — Avaliação e entrega técnica (4 h 30)
 
@@ -193,3 +193,5 @@ Ao fechar cada fase, eu escrevo a seção, você revisa, e o registro abaixo rec
 - 2026-11-20: segunda sessão de GPU. O E4 foi retreinado do zero no Colab, porque o checkpoint da primeira sessão não chegou ao Drive; mesma semente, mesmo orçamento, 6 minutos. T34 e T35 concluídas: `src/analise_moe.py` mediu utilização top-1, entropia normalizada, despacho por token e por centro nas duas variantes. Utilização entre 0,092 e 0,159 por bloco nas duas, entropia entre 0,69 e 0,81, sem colapso. A especialização por token é forte mesmo com entropia alta: na E2, no bloco 0, a vírgula manda 0,082 do seu tráfego para o especialista 0 e 0,0015 para o especialista 3. BPB de validação medido nos quatro: E1 1,4231, E2 1,4093, E3 1,4180, E4 1,3522, sobre 1.575.936 tokens e 7.884.234 bytes. As avaliações em CPU do E2 e do E3 conferiram com as da GPU até a sétima casa decimal.
 - 2026-11-20: corrigida a ponderação da validação no laço de treino. `avaliar` fazia média das médias por lote, e o último lote da validação tem 12 janelas em 49, dez vezes o peso que os tokens dele representam. A média agora é por token, igual à de `evaluate.py`. Os CSVs em `logs/` foram gerados antes da correção e leem cerca de 0,008 nats acima do valor correto no ponto final; a diferença foi medida lote a lote (o último vale 5,3709 contra 4,9350 do resto). T43 regenera os CSVs com o código novo.
 - 2026-11-20: `src/extrapolacao.py` escrito para a T39. As janelas têm passo igual ao contexto e o lote é limitado ao número de janelas, senão `drop_last` descarta tudo. A atenção manual ganhou máscara refeita quando a janela passa do contexto de treino; o caminho SDPA já funcionava, porque a causalidade vai no kernel. Dois testes novos: 64 tokens num modelo configurado para 32, nos dois caminhos de atenção, e o script recusando o modelo com posição aprendida com erro anotado em vez de queda.
+- 2026-11-20: T39 concluída na GPU. Extrapolação medida com janelas do tamanho do contexto, sem sobreposição: 1.572.864 tokens e 7.870.583 bytes por linha. RoPE: loss 4,7033 em 128, 4,6883 em 256, 4,7053 em 512 e 4,7591 em 1024, ou 0,4% e 1,5% acima do valor de treino. O vanilla vai a 1,4248 em 128 e 1,4226 em 256, e recusa 512 com mensagem, porque o embedding posicional aprendido não tem linha além da 256. O RoPE, portanto, não ganha com a janela maior, já que não foi treinado nela, e também não quebra. Análise de roteamento regravada com `--saida`: `logs/e2_analise_moe.json` e `logs/e3_analise_moe.json`. Hash do E4: `3ae40e8c...28808a41`.
+- 2026-11-20: T29 e T30 fechadas. O BPB do E1, a perplexidade, as três amostras e o hash já existiam; faltava só o registro. Os CSVs, as amostras e os JSONs de avaliação estão versionados em `logs/`.
