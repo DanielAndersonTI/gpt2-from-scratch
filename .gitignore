@@ -1,0 +1,29 @@
+# Corpus e artefatos de treino não entram no Git.
+/train.txt
+/val.txt
+/train.parquet
+/val.parquet
+/corpus_ufcg_introducoes_alunos.zip
+/corpus/
+
+# Tokenizador de referência: versionado, 1,6 MB, necessário para reproduzir.
+
+# Artefatos de treino
+/checkpoints/
+*.pt
+*.npy
+*.npz
+*.bin
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Logs grandes; os CSV pequenos são versionados
+logs/*.log
+logs/*.out

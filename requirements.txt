@@ -1,0 +1,12 @@
+# Dependências do projeto.
+# No Colab, torch já vem instalado: instale apenas o que falta
+#   pip install -q tokenizers pyyaml tqdm
+# Não reinstale o torch com este arquivo no Colab, para não trocar a build da T4.
+torch>=2.4
+tokenizers>=0.20
+numpy>=2.0
+pandas>=2.2
+pyarrow>=17
+matplotlib>=3.8
+pyyaml>=6.0
+tqdm>=4.66
