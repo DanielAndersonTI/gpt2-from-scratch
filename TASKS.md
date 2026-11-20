@@ -1,6 +1,6 @@
 # Tarefas — GPT-2 do zero em português (pós-graduação)
 
-Atualizado em 2026-11-20. Progresso: 26 de 50 concluídas, 5 em andamento. Prazo final: 14 de dezembro de 2026, 23:59.
+Atualizado em 2026-11-20. Progresso: 34 de 50 concluídas, 1 em andamento. Prazo final: 14 de dezembro de 2026, 23:59.
 
 Marcas: `[ ]` pendente, `[~]` em andamento, `[x]` feito, `[!]` bloqueado. A ordem é a de execução, e cada tarefa só começa quando a anterior fecha. O tempo de GPU aparece marcado; o restante é trabalho de escrita, teste e revisão.
 
@@ -42,10 +42,10 @@ Total: 48 a 51 h de trabalho e cerca de 3 h 40 de GPU.
 | ID | Tarefa | Entregável | Tempo | Status |
 |---|---|---|---|---|
 | T17 | Loop do Apêndice D: warmup linear, cosine, clipping e AdamW com weight decay só nos pesos | loop final | 1 h 30 | `[x]` |
-| T18 | Precisão mista fp16 com GradScaler | treino estável na T4 | 40 min | `[~]` |
-| T19 | Atenção via `scaled_dot_product_attention` | FlashAttention acionado | 30 min | `[~]` |
-| T20 | AdamW `fused` | otimizador em uma chamada | 20 min | `[~]` |
-| T21 | `torch.compile` condicional por config | liga e desliga sem tocar no código | 30 min | `[~]` |
+| T18 | Precisão mista fp16 com GradScaler | treino estável na T4 | 40 min | `[x]` |
+| T19 | Atenção via `scaled_dot_product_attention` | FlashAttention acionado | 30 min | `[x]` |
+| T20 | AdamW `fused` | otimizador em uma chamada | 20 min | `[x]` |
+| T21 | `torch.compile` condicional por config | liga e desliga sem tocar no código | 30 min | `[x]` |
 | T22 | Checkpoint completo (modelo, otimizador, scheduler, scaler, passo, época, lote) e retomada | continuidade bit a bit verificada | 1 h | `[x]` |
 | T23 | Avaliação a cada 10% do treino e amostra de texto no log | curva e amostras no CSV | 40 min | `[x]` |
 | T24 | Runner autônomo de sessão, com retomada automática e parada antes do limite | treino sobrevive a queda | 1 h | `[x]` |
@@ -56,13 +56,13 @@ Total: 48 a 51 h de trabalho e cerca de 3 h 40 de GPU.
 | ID | Tarefa | Entregável | Tempo | Status |
 |---|---|---|---|---|
 | T26 | Script de benchmark: 200 passos em cinco configurações, tokens/s e memória de pico | `benchmark.csv` | 1 h | `[x]` |
-| T27 | Rodar o benchmark no Colab e montar a tabela antes e depois | tabela do artigo | 1 h, 35 min GPU | `[ ]` |
+| T27 | Rodar o benchmark no Colab e montar a tabela antes e depois | tabela do artigo | 1 h, 35 min GPU | `[x]` |
 
 ## Fase 5 — E1 vanilla (1 h 20)
 
 | ID | Tarefa | Entregável | Tempo | Status |
 |---|---|---|---|---|
-| T28 | Treinar o E1 completo, 27,4M tokens | checkpoint do baseline | 40 min GPU | `[ ]` |
+| T28 | Treinar o E1 completo, 27,4M tokens | checkpoint do baseline | 40 min GPU | `[x]` |
 | T29 | BPB, perplexidade, três prompts e hash SHA-256 do checkpoint | números do E1 | 30 min | `[ ]` |
 | T30 | Commitar log, curva e hash | checkpoint rastreado | 10 min | `[ ]` |
 
@@ -72,7 +72,7 @@ Total: 48 a 51 h de trabalho e cerca de 3 h 40 de GPU.
 |---|---|---|---|---|
 | T31 | `src/moe.py`: roteador top-2, oito especialistas e loss auxiliar de 0,01 | camada MoE | 2 h | `[x]` |
 | T32 | Testes: parâmetros ativos e totais da tabela, shapes e aux loss nula com roteamento uniforme | `tests/` verde | 50 min | `[x]` |
-| T33 | Treinar E2 (h=512) e E3 (h=128) | dois checkpoints | 1 h, 1 h 45 GPU | `[ ]` |
+| T33 | Treinar E2 (h=512) e E3 (h=128) | dois checkpoints | 1 h, 1 h 45 GPU | `[x]` |
 | T34 | Utilização por especialista e entropia do roteador ao longo do treino | gráfico de colapso | 1 h | `[ ]` |
 | T35 | Roteamento por tipo de token e por `sigla_centro` | tabela de especialização | 1 h | `[ ]` |
 | T36 | Figuras e tabela de análise do MoE | material do artigo | 30 min | `[ ]` |
@@ -82,7 +82,7 @@ Total: 48 a 51 h de trabalho e cerca de 3 h 40 de GPU.
 | ID | Tarefa | Entregável | Tempo | Status |
 |---|---|---|---|---|
 | T37 | `src/rope.py` e testes: norma preservada e produto interno dependente da distância | rotação verificada | 1 h 30 | `[x]` |
-| T38 | Integrar RoPE em Q e K e treinar o E4 | checkpoint do E4 | 1 h, 40 min GPU | `[ ]` |
+| T38 | Integrar RoPE em Q e K e treinar o E4 | checkpoint do E4 | 1 h, 40 min GPU | `[x]` |
 | T39 | Extrapolação em 256, 512 e 1024 e figura comparativa | resultado da modificação | 1 h 30 | `[ ]` |
 
 ## Fase 8 — Avaliação e entrega técnica (4 h 30)
@@ -126,21 +126,22 @@ não é o código: são as sessões de GPU, porque o Colab gratuito dá cerca de
 | 8. Avaliação e entrega | 90 min | 20 min | 20 min | F7 |
 | 9. Artigo e oral | 6 a 8 h de redação | 0 | 6 a 8 h de revisão | F8 |
 
-Dez das doze horas de GPU cabem em três noites. As fases 1 a 3 podem rodar em
-paralelo com o seu dia, porque não usam GPU.
+A estimativa supunha cerca de 11 mil tokens por segundo. A T4 mediu entre 82 e
+110 mil, porque a configuração final usa precisão mista e a atenção pelo kernel
+do PyTorch. Os quatro treinos que pediam 3 h 40 de GPU levaram 27 minutos no
+total.
 
-### Calendário projetado
+### Calendário real
 
 | Data | Entrega |
 |---|---|
-| 21/11 | fases 1 a 3 fechadas, pipeline testado em CPU |
-| 23/11 | benchmark medido, E1 treinado à noite |
-| 26/11 | E2 e E3 treinados, análise de utilização escrita |
-| 28/11 | E4 treinado, extrapolação medida |
-| 01/12 | avaliação final, reprodutibilidade conferida, relatório completo |
-| 05/12 | artigo completo para revisão |
-| 10/12 | PDF compilado, slides e ensaio da oral |
-| 13/12 | margem para imprevisto e revisão final |
+| 20/11 | fases 1 a 7 fechadas, quatro treinos e benchmark concluídos |
+| 22/11 | BPB, hashes, figuras e análise de utilização do MoE; relatório até a fase 7 |
+| 27/11 | artigo completo para revisão |
+| 03/12 | revisão do artigo e compilação no modelo SBC |
+| 08/12 | slides e ensaio da oral |
+| 12/12 | margem para imprevisto e revisão final |
+| 14/12 | entrega |
 
 ## Protocolo de execução noturna
 
@@ -187,4 +188,5 @@ Ao fechar cada fase, eu escrevo a seção, você revisa, e o registro abaixo rec
 - 2026-11-19: notebook do professor renderizado em Markdown e reconstruído em `.ipynb` válido. Ambiente e acessos verificados. Regra do relatório incremental definida.
 - 2026-11-19: T01, T02 e T06 concluídas. Repositório inicializado na pasta do projeto, ligado a `github.com/DanielAndersonTI/gpt2-from-scratch`. Estrutura criada, corpus fora do Git, README esqueleto escrito. A pasta foi excluída do repositório externo `I.T` em `.git/info/exclude`. Colab confirmado com T4 e PyTorch 2.14.1. Sincronização local do Drive ainda não visível no Explorer.
 - 2026-11-19: T03, T04, T05 e T07 a T12 concluídas, T08 em andamento. `src/config.py`, `src/seeds.py`, `src/logging_utils.py` e `src/data.py` escritos; 64 testes passando em CPU. Pré-tokenização local conferida contra os números do professor: 20.722 documentos e 27.451.491 tokens no treino, 1.152 e 1.576.142 na validação, 107.232 janelas de 256 no treino. A ordem dos documentos no `.txt` foi verificada contra o `.parquet` documento a documento, o que autoriza a junção por índice. Fertilidade: 1,373 no treino e 1,374 na validação completa; o 1,42 do notebook vem de uma amostra de 200 mil caracteres, não da validação inteira.
-- 2026-11-20: T13 a T17, T22 a T26, T31, T32, T37, T40 e T41 concluídas; T18 a T21 implementadas e aguardando a primeira sessão de GPU. `src/model.py`, `src/moe.py`, `src/rope.py`, `src/train.py`, `src/benchmark.py`, `src/evaluate.py`, `src/generate.py` e `src/run_session.py` escritos, com 110 testes passando em CPU. Contagem de parâmetros reproduzida nas quatro configurações: E1 11.414.016, E2 17.733.152 com 11.423.264 ativos, E3 11.429.408 com 9.847.328 ativos, E4 11.348.480. Os especialistas têm viés, o que explica os números. A retomada foi verificada bit a bit em CPU: interromper e continuar produz os mesmos pesos de um treino contínuo. A fumaça de CPU rodou 30 passos com loss de 9,60 para 8,83, e um treino de 4 passos com MoE conferiu o encadeamento da perda auxiliar. O benchmark foi separado do log de treino em `logs/benchmark.csv`.
+- 2026-11-20: primeira sessão de GPU, no Colab com a T4, cerca de 80 min no total. T18 a T21, T27, T28, T33 e T38 concluídas. Os quatro treinos fecharam 837 passos e 27.426.816 tokens cada, em 5 a 7 minutos, entre 82 e 110 mil tokens por segundo. Loss de validação: E1 4,9430; E2 4,8955; E3 4,9256; E4 4,6977. Benchmark por variante (tokens/s e memória de pico): base 46.909 e 14.291 MB, amp 85.789 e 11.118 MB, sdpa 49.266 e 13.085 MB, fused 46.298 e 14.291 MB, compile 58.041 e 12.078 MB, todas 178.688 e 7.832 MB. O conjunto otimizado é 3,81 vezes mais rápido que a base e usa 45% menos memória. A variante base só caberia com `expandable_segments:True`: sem precisão mista, a matriz de logits de um lote de 128 por 256 tokens por 16.000 de vocabulário ocupa 2,1 GB.
+- 2026-11-20: T13 a T17, T22 a T26, T31, T32, T37, T40 e T41 concluídas em CPU. `src/model.py`, `src/moe.py`, `src/rope.py`, `src/train.py`, `src/benchmark.py`, `src/evaluate.py`, `src/generate.py` e `src/run_session.py` escritos, com 110 testes passando em CPU. Contagem de parâmetros reproduzida nas quatro configurações: E1 11.414.016, E2 17.733.152 com 11.423.264 ativos, E3 11.429.408 com 9.847.328 ativos, E4 11.348.480. Os especialistas têm viés, o que explica os números. A retomada foi verificada bit a bit: interromper e continuar produz os mesmos pesos de um treino contínuo. A fumaça rodou 30 passos com loss de 9,60 para 8,83, e um treino de 4 passos com MoE conferiu o encadeamento da perda auxiliar. O benchmark foi separado do log de treino em `logs/benchmark.csv`.

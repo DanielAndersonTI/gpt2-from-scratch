@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from dataclasses import replace
 from pathlib import Path
 
 import torch
@@ -105,13 +106,21 @@ def avaliar_checkpoint(
     device: str = "auto",
     max_lotes: int | None = None,
     saida: str | Path | None = None,
+    work_dir: str | Path | None = None,
 ) -> dict:
-    """Calcula os números finais e, se pedido, grava um JSON."""
+    """Calcula os números finais e, se pedido, grava um JSON.
+
+    `work_dir` tem precedência sobre o do checkpoint. É o que permite avaliar no
+    computador local um modelo treinado no Drive do Colab, que grava o caminho
+    `/content/drive/...` dentro do checkpoint.
+    """
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
     dispositivo = torch.device(device)
 
     model, cfg = carregar_modelo(caminho_checkpoint, dispositivo)
+    if work_dir is not None:
+        cfg = replace(cfg, run=replace(cfg.run, work_dir=str(work_dir)))
     corpus = localizar_corpus(cfg.run.work_dir)
     tokenizer = TokenizadorUFCG(corpus.tokenizer)
     ids = preparar(split, corpus, tokenizer, cfg.abspath(cfg.data.preprocessed_dir)).ids
@@ -161,6 +170,11 @@ def main() -> None:
     p.add_argument("--split", default="val", choices=["train", "val"])
     p.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     p.add_argument("--max-lotes", type=int, default=None)
+    p.add_argument(
+        "--work-dir",
+        default=None,
+        help="sobrepõe o diretório de trabalho gravado no checkpoint",
+    )
     p.add_argument("--saida", default=None, help="caminho do JSON de resultado")
     args = p.parse_args()
 
@@ -170,6 +184,7 @@ def main() -> None:
         device=args.device,
         max_lotes=args.max_lotes,
         saida=args.saida,
+        work_dir=args.work_dir,
     )
 
 

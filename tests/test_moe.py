@@ -207,3 +207,37 @@ def test_treino_curto_com_moe_roda_ponta_a_ponta(projeto_sintetico):
     resumo = treinar(cfg, log_every=2)
     assert resumo["passos"] == 4
     assert torch.isfinite(torch.tensor(resumo["loss_val"]))
+
+
+def test_analise_de_roteamento_devolve_as_tres_tabelas(projeto_sintetico):
+    """A análise de utilização lê o checkpoint e fecha as contas.
+
+    O que importa aqui: as frações de utilização somam 1 por bloco, a entropia
+    fica em [0, 1] e o despacho por centro cobre todos os tokens da partição.
+    """
+    from src.analise_moe import analisar
+
+    raiz, vocab = projeto_sintetico
+    cfg = config_sintetica(raiz, vocab, max_steps=2, checkpoint_every=2)
+    cfg = replace(
+        cfg,
+        model=replace(
+            cfg.model,
+            ffn_type="moe",
+            moe=MoEConfig(n_experts=4, top_k=2, hidden_dim=16, aux_loss_coef=0.01),
+        ),
+        run=replace(cfg.run, name="teste_analise"),
+        logging=replace(cfg.logging, csv_path="logs/teste_analise.csv"),
+    )
+    resumo = treinar(cfg, log_every=2)
+
+    resultado = analisar(resumo["checkpoint"], max_lotes=1, device="cpu")
+
+    assert resultado["lotes_avaliados"] == 1
+    for fracoes in resultado["utilizacao_top1"].values():
+        assert sum(fracoes) == pytest.approx(1.0, abs=1e-3)
+    for valor in resultado["entropia_normalizada"].values():
+        assert 0.0 <= valor <= 1.0
+    centros = resultado["por_centro"]["bloco_0"]
+    assert "CCT" in centros
+    assert centros["CCT"]["despachos"] == 4 * 32  # lote 4 x contexto 32

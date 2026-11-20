@@ -144,6 +144,10 @@ class MoEFeedForward(nn.Module):
         else:
             self.aux_loss = None
 
+        # Guarda o roteamento do último lote para a análise (T34 e T35). Sem
+        # gradiente e sem histórico: só o último lote fica na memória.
+        self.ultimo_roteamento = (probs.detach(), indices.detach())
+
         return self.dropout(saida).reshape(b, n_tokens, d)
 
     def _perda_de_balanceamento(

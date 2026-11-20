@@ -1,0 +1,14 @@
+{
+  "experimento": "e1_vanilla",
+  "split": "val",
+  "checkpoint": "C:/Users/Daniel/Meu Drive/LLM_Final/checkpoints/e1_vanilla_ultimo.pt",
+  "passos_treinados": 837,
+  "parametros": 11414016,
+  "parametros_ativos": 11414016,
+  "loss": 4.934981587182554,
+  "perplexidade": 139.07058182726828,
+  "bpb": 1.4231122158632041,
+  "tokens_avaliados": 1575936,
+  "bytes_avaliados": 7884234,
+  "horario": "2026-11-20T22:52:53"
+}

@@ -15,12 +15,12 @@ Entrega: 14 de dezembro de 2026, 23:59.
 | 0. Fundação | concluída |
 | 1. Dados | concluída, exceto a comparação com o `tiktoken` |
 | 2. Modelo | concluída |
-| 3. Treino | concluída em CPU; as quatro otimizações de GPU aguardam a primeira sessão |
-| 4. Benchmark | pendente |
-| 5. E1 vanilla | pendente |
-| 6. MoE | camada e testes prontos; treino na GPU pendente |
-| 7. RoPE | camada e testes prontos; treino na GPU pendente |
-| 8. Avaliação | pendente |
+| 3. Treino | concluída; as quatro otimizações medidas na T4 |
+| 4. Benchmark | concluída |
+| 5. E1 vanilla | treinado; BPB e hash pendentes |
+| 6. MoE | duas variantes treinadas |
+| 7. RoPE | treinada; extrapolação pendente |
+| 8. Avaliação | em andamento |
 | 9. Artigo e oral | pendente |
 
 O acompanhamento detalhado, tarefa por tarefa, está em [TASKS.md](TASKS.md). O
@@ -29,14 +29,15 @@ desenho experimental e os tempos estão em [PLANO.md](PLANO.md).
 ## Experimentos
 
 Todos usam o tokenizador de referência de 16k, contexto de 256 tokens,
-27,4M tokens de treino e semente 123.
+27,4M tokens de treino e semente 123. Os quatro treinos rodaram em 20/11/2026
+na T4 do Colab, 837 passos cada, em 5 a 7 minutos.
 
-| ID | Modelo | Parâmetros totais / ativos | Checkpoint | Log | BPB val |
+| ID | Modelo | Parâmetros totais / ativos | Loss val | BPB val | Log |
 |---|---|---|---|---|---|
-| E1 | vanilla otimizado | 11,41M / 11,41M | pendente | pendente | pendente |
-| E2 | MoE, 8 especialistas, top-2, h=512 | 17,73M / 11,42M | pendente | pendente | pendente |
-| E3 | MoE, 8 especialistas, top-2, h=128 | 11,43M / 9,85M | pendente | pendente | pendente |
-| E4 | RoPE | 11,35M / 11,35M | pendente | pendente | pendente |
+| E1 | vanilla otimizado | 11,41M / 11,41M | 4,9430 | 1,4231 | `logs/e1_vanilla.csv` |
+| E2 | MoE, 8 especialistas, top-2, h=512 | 17,73M / 11,42M | 4,8955 | pendente | `logs/e2_moe_h512.csv` |
+| E3 | MoE, 8 especialistas, top-2, h=128 | 11,43M / 9,85M | 4,9256 | pendente | `logs/e3_moe_h128.csv` |
+| E4 | RoPE | 11,35M / 11,35M | 4,6977 | pendente | `logs/e4_rope.csv` |
 
 ## Estrutura
 
@@ -94,15 +95,16 @@ O runner retoma do último checkpoint sozinho. Para recomeçar do zero, apague
 
 ## Checkpoints e hashes
 
-Preenchido ao final de cada treino. O corpus tem partição de treino e de
-validação, sem partição de teste; todo BPB reportado é de validação.
+Treinados em 20/11/2026, na T4 do Colab, 837 passos e 27.426.816 tokens cada. O
+corpus tem partição de treino e de validação, sem partição de teste; todo BPB
+reportado é de validação.
 
-| Modelo | Arquivo | SHA-256 | BPB validação |
-|---|---|---|---|
-| E1 | pendente | pendente | pendente |
-| E2 | pendente | pendente | pendente |
-| E3 | pendente | pendente | pendente |
-| E4 | pendente | pendente | pendente |
+| Modelo | Arquivo | SHA-256 | Loss val | BPB validação |
+|---|---|---|---|---|
+| E1 | `e1_vanilla_ultimo.pt` | `51d1179b5007aa05176d43759e57e05a9d978e02524a32cc64a0298d137e08fb` | 4,9430 | 1,4231 |
+| E2 | `e2_moe_h512_ultimo.pt` | `b42674cf8e32bdc41fe13b4325b0c44e257510f235db5e5b709d71f5d163b92d` | 4,8955 | pendente |
+| E3 | `e3_moe_h128_ultimo.pt` | `a354e2a40ba3a3e0959205f4bb19541c4fa5ab3066e00229e772c6eecf6b2723` | 4,9256 | pendente |
+| E4 | pendente de sincronização | pendente | 4,6977 | pendente |
 
 ## Documentos
 
