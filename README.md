@@ -75,6 +75,20 @@ tokens da avaliação padrão, porque as pontas que não fecham uma janela intei
 ficam de fora; por isso o BPB de 256 do RoPE aqui é 1,3517 e não 1,3522.
 
 
+## Análise do roteamento
+
+`python -m src.figuras_moe` lê `logs/e2_moe_h512_roteamento.json` e
+`logs/e3_moe_h128_roteamento.json` e escreve três figuras em `figuras/`: a
+fatia do tráfego top-1 por especialista e bloco, com escala divergente
+centrada em 12,5%; a entropia normalizada por bloco; e a repartição dos dez
+tokens mais frequentes no bloco 0. A tabela resumo sai em
+`tabelas/roteamento.tex`.
+
+Nenhuma das duas variantes colapsa. A fatia fica entre 0,092 e 0,159, contra
+0,125 do valor justo, e a entropia entre 0,69 e 0,81. A especialização por
+token é forte mesmo assim: no E2, 60% dos despachos de ` de` vão para o
+especialista 4 do bloco 0, e 33% dos da vírgula vão para o especialista 0.
+
 ## Estrutura
 
 ```
@@ -82,6 +96,8 @@ src/          modelo, dados, treino, avaliação
 configs/      um YAML por experimento
 tests/        testes de shapes, máscara causal, parâmetros e retomada
 logs/         CSV de cada treino, versionados
+figuras/      figuras do MoE, geradas por src/figuras_moe.py
+tabelas/      tabela LaTeX do roteamento, gerada pelo mesmo script
 notebooks/    material do professor e o notebook de treino no Colab
 docs/         enunciado, README do corpus e notas
 ```

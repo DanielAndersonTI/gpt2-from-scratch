@@ -1,0 +1,32 @@
+{
+  "checkpoint": "/content/drive/MyDrive/LLM_Final/checkpoints/e1_vanilla_ultimo.pt",
+  "split": "val",
+  "contextos": [
+    {
+      "contexto": 128,
+      "contexto_de_treino": 256,
+      "janelas": 12313,
+      "tokens_avaliados": 1572864,
+      "bytes_avaliados": 7870583,
+      "loss": 4.9418,
+      "perplexidade": null,
+      "bpb": 1.4248
+    },
+    {
+      "contexto": 256,
+      "contexto_de_treino": 256,
+      "janelas": 6156,
+      "tokens_avaliados": 1572864,
+      "bytes_avaliados": 7870583,
+      "loss": 4.9341,
+      "perplexidade": null,
+      "bpb": 1.4226
+    },
+    {
+      "contexto": 512,
+      "erro": "o modelo aprende posições até 256 tokens; 512 exigiria RoPE"
+    }
+  ],
+  "horario": "2026-11-20T23:50:31",
+  "fonte": "console do Colab, transcrito da saida de src.extrapolacao em 2026-11-20"
+}
